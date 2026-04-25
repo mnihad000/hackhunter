@@ -1,10 +1,4 @@
-type Transaction = {
-  id: number;
-  category: string;
-  merchant: string;
-  amount: number;
-  time: string;
-};
+import { formatCurrency, getCategoryTotals, type Transaction } from "../demoLogic";
 
 type SpendingPieChartProps = {
   transactions: Transaction[];
@@ -26,13 +20,6 @@ const categoryInsights: Record<string, string> = {
   Entertainment: "Entertainment is small but easy to trim when a goal needs a final push.",
   Shopping: "Shopping is the most flexible category in this sample, so it is a good place to pause.",
 };
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-}
 
 function polarToCartesian(center: number, radius: number, angleInDegrees: number) {
   const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180;
@@ -70,15 +57,10 @@ function SpendingPieChart({
   onSelectCategory,
 }: SpendingPieChartProps) {
   const total = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
-  const categories = transactions.reduce<Record<string, number>>((totals, transaction) => {
-    totals[transaction.category] = (totals[transaction.category] ?? 0) + transaction.amount;
-    return totals;
-  }, {});
+  const categoryTotals = getCategoryTotals(transactions);
 
   let runningTotal = 0;
-  const segments = Object.entries(categories)
-    .sort(([, firstAmount], [, secondAmount]) => secondAmount - firstAmount)
-    .map(([category, amount]) => {
+  const segments = categoryTotals.map(({ category, amount }) => {
       const start = (runningTotal / total) * 100;
       runningTotal += amount;
       const end = (runningTotal / total) * 100;
@@ -105,6 +87,9 @@ function SpendingPieChart({
         )}
       </div>
 
+      {segments.length === 0 ? (
+        <p className="empty-copy">Transactions will appear here once a purchase is logged.</p>
+      ) : (
       <div className="spending-chart-layout">
         <div
           className="pie-chart"
@@ -157,6 +142,7 @@ function SpendingPieChart({
           })}
         </ul>
       </div>
+      )}
       <p className="category-insight">
         {selectedCategory
           ? categoryInsights[selectedCategory] ?? "This category is worth a closer look."

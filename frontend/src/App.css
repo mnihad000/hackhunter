@@ -48,6 +48,18 @@
   pointer-events: auto;
 }
 
+.landing-loading {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  background: #060807;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 3rem;
+  font-weight: 900;
+}
+
 .landing-page {
   min-height: 100%;
   display: flex;
@@ -163,6 +175,13 @@
 
 .primary-action:hover {
   background: var(--sage-dark);
+}
+
+.compact-action {
+  min-width: auto;
+  min-height: 42px;
+  border-radius: 12px;
+  padding: 0 16px;
 }
 
 .dashboard-page {
@@ -404,7 +423,7 @@
 
 .goal-editor {
   display: grid;
-  grid-template-columns: 1fr 120px;
+  grid-template-columns: minmax(0, 1fr) repeat(2, 120px);
   gap: 10px;
   margin-top: 16px;
 }
@@ -418,7 +437,8 @@
   letter-spacing: 0.06em;
 }
 
-.goal-editor input {
+.goal-editor input,
+.goal-editor select {
   width: 100%;
   min-height: 42px;
   box-sizing: border-box;
@@ -433,7 +453,8 @@
   outline: none;
 }
 
-.goal-editor input:focus {
+.goal-editor input:focus,
+.goal-editor select:focus {
   border-color: rgba(79, 143, 115, 0.55);
   box-shadow: 0 0 0 3px rgba(79, 143, 115, 0.12);
 }
@@ -768,5 +789,9 @@
 
   .secondary-action {
     width: fit-content;
+  }
+
+  .segmented-control {
+    grid-template-columns: 1fr;
   }
 }

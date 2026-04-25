@@ -1,23 +1,9 @@
-import type { Goal } from "./Dashboard";
-
-type Prediction = {
-  category: string;
-  window: string;
-  probability: number;
-  amount: number;
-};
+import { formatCurrency, type Goal, type Prediction } from "../demoLogic";
 
 type PredictionCardProps = {
   prediction: Prediction;
   goal: Goal;
 };
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-}
 
 function PredictionCard({ prediction, goal }: PredictionCardProps) {
   const skipOptions = [1, 3, 5];

@@ -1,23 +1,10 @@
-type Transaction = {
-  id: number;
-  category: string;
-  merchant: string;
-  amount: number;
-  time: string;
-};
+import { formatCurrency, type Transaction } from "../demoLogic";
 
 type TransactionListProps = {
   transactions: Transaction[];
   selectedCategory: string | null;
   onClearCategory: () => void;
 };
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-}
 
 function TransactionList({
   transactions,

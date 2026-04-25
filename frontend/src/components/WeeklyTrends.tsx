@@ -1,4 +1,11 @@
-const trends = [
+import { getCategoryTotals, type Prediction, type Transaction } from "../demoLogic";
+
+type WeeklyTrendsProps = {
+  transactions: Transaction[];
+  prediction: Prediction;
+};
+
+const defaultTrends = [
   {
     label: "Food",
     value: "+18%",
@@ -16,7 +23,28 @@ const trends = [
   },
 ];
 
-function WeeklyTrends() {
+function WeeklyTrends({ transactions, prediction }: WeeklyTrendsProps) {
+  const topCategory = getCategoryTotals(transactions)[0];
+  const trends = topCategory
+    ? [
+        {
+          label: topCategory.category,
+          value: `${topCategory.percent}%`,
+          copy: "Largest current share of recent spending.",
+        },
+        {
+          label: prediction.category,
+          value: `${prediction.probability}%`,
+          copy: "Most predictable habit by time of day.",
+        },
+        {
+          label: "Goal impact",
+          value: `$${Math.round(prediction.amount * 5)}`,
+          copy: "Potential weekly savings from skipping this habit.",
+        },
+      ]
+    : defaultTrends;
+
   return (
     <section className="panel trend-card" aria-labelledby="trends-title">
       <p className="section-label">weekly trends</p>

@@ -1,4 +1,10 @@
 import { useMemo, useState } from "react";
+import {
+  initialGoal,
+  initialPrediction,
+  initialTransactions,
+  type Goal,
+} from "../demoLogic";
 import GoalProgress from "./GoalProgress";
 import NudgeSettings, { type NudgeFrequency, type NudgeTone } from "./NudgeSettings";
 import PredictionCard from "./PredictionCard";
@@ -11,33 +17,6 @@ type DashboardProps = {
   onBack: () => void;
 };
 
-export type Goal = {
-  name: string;
-  target: number;
-  saved: number;
-};
-
-const prediction = {
-  category: "Coffee",
-  window: "7:30-8:30 AM",
-  probability: 74,
-  amount: 6.5,
-};
-
-const initialGoal: Goal = {
-  name: "Bike fund",
-  target: 250,
-  saved: 208,
-};
-
-const transactions = [
-  { id: 1, category: "Food", merchant: "Coffee", amount: 6.5, time: "Today, 8:04 AM" },
-  { id: 2, category: "Food", merchant: "Food delivery", amount: 15.2, time: "Yesterday, 7:18 PM" },
-  { id: 3, category: "Transportation", merchant: "Uber", amount: 14.2, time: "Monday, 5:41 PM" },
-  { id: 4, category: "Entertainment", merchant: "Movie rental", amount: 7.99, time: "Sunday, 9:12 PM" },
-  { id: 5, category: "Shopping", merchant: "Phone case", amount: 11.75, time: "Saturday, 2:24 PM" },
-];
-
 function formatCurrentDate() {
   return new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -48,16 +27,16 @@ function formatCurrentDate() {
 
 function Dashboard({ onBack }: DashboardProps) {
   const [goal, setGoal] = useState<Goal>(initialGoal);
+  const [prediction] = useState(initialPrediction);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [nudgeTone, setNudgeTone] = useState<NudgeTone>("Gentle");
   const [nudgeFrequency, setNudgeFrequency] = useState<NudgeFrequency>("Normal");
   const currentDate = formatCurrentDate();
-
   const filteredTransactions = useMemo(
     () =>
       selectedCategory
-        ? transactions.filter((transaction) => transaction.category === selectedCategory)
-        : transactions,
+        ? initialTransactions.filter((transaction) => transaction.category === selectedCategory)
+        : initialTransactions,
     [selectedCategory],
   );
 
@@ -70,15 +49,15 @@ function Dashboard({ onBack }: DashboardProps) {
             <h1 id="dashboard-title">{currentDate}</h1>
           </div>
           <button className="secondary-action" type="button" onClick={onBack}>
-            Landing
+            Back
           </button>
         </header>
 
         <PredictionCard prediction={prediction} goal={goal} />
         <GoalProgress goal={goal} onGoalChange={setGoal} />
-        <WeeklyTrends />
+        <WeeklyTrends transactions={initialTransactions} prediction={prediction} />
         <SpendingPieChart
-          transactions={transactions}
+          transactions={initialTransactions}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
         />

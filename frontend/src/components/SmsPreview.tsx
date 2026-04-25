@@ -1,10 +1,5 @@
-import type { Goal } from "./Dashboard";
+import { formatCurrency, type Goal, type Prediction } from "../demoLogic";
 import type { NudgeFrequency, NudgeTone } from "./NudgeSettings";
-
-type Prediction = {
-  category: string;
-  amount: number;
-};
 
 type SmsPreviewProps = {
   prediction: Prediction;
@@ -12,13 +7,6 @@ type SmsPreviewProps = {
   tone: NudgeTone;
   frequency: NudgeFrequency;
 };
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-}
 
 function buildMessage(prediction: Prediction, goal: Goal, tone: NudgeTone) {
   const amount = formatCurrency(prediction.amount);
