@@ -1,286 +1,44 @@
-# 📱 Frontend Design — PiggyBank
+# Frontend Design - Spendly
 
-## 🎯 Overview
+## Overview
 
-The frontend is a **mobile-first, lightweight interface** that complements PiggyBank’s SMS-based experience.
+The frontend is a mobile-first Vite React demo that complements Spendly's planned SMS-based experience. It is not a replacement for SMS; it gives users a lightweight place to review predictions, goals, preferences, and recent spending.
 
-PiggyBank is **not a traditional app** — the primary interaction happens through SMS.
-The frontend exists to:
+## Current Stack
 
-* visualize spending
-* show predictions
-* track goals
-* provide a clean, minimal dashboard
+- Framework: Vite + React + TypeScript
+- Styling: CSS
+- Visuals: Three.js, React Three Fiber, OGL, GSAP
+- Build: `npm run build` from `frontend/`
 
----
+## Core Screens
 
-## 🧠 Design Philosophy
+### Landing
 
-### 1. Mobile-First
+The landing screen introduces Spendly with a 3D visual scene and a direct `Get Started` call to action. The visual stack is lazy-loaded so dashboard code can remain lighter.
 
-The UI is designed for phone screens first:
+### Dashboard
 
-* narrow layouts
-* large touch targets
-* minimal navigation
+The dashboard shows:
 
----
+- next likely spend
+- goal progress and editable goal values
+- weekly signal cards
+- category breakdown
+- nudge tone and frequency settings
+- SMS nudge preview
+- recent transactions
 
-### 2. Chat > Dashboard
+## UX Principles
 
-PiggyBank is fundamentally:
+- Keep the first screen focused and direct.
+- Make the dashboard feel actionable rather than purely informational.
+- Use mobile-friendly controls and stable card dimensions.
+- Tie every spending insight back to a concrete goal.
 
-> a conversation, not a spreadsheet
+## Future Improvements
 
-The frontend supports the experience, it doesn’t replace it.
-
----
-
-### 3. Low Friction
-
-* no complex onboarding
-* simple views
-* fast load times
-
----
-
-## 🛠️ Tech Stack
-
-* Framework: Next.js
-* Styling: Tailwind CSS (recommended)
-* Deployment: Vercel
-
----
-
-## 📂 Project Structure
-
-```text
-frontend/
-│
-├── pages/
-│   ├── index.tsx        # dashboard
-│   ├── chat.tsx         # optional web chat
-│   └── goals.tsx        # savings goals
-│
-├── components/
-│   ├── TransactionList.tsx
-│   ├── PredictionCard.tsx
-│   ├── GoalProgress.tsx
-│   └── ChatBubble.tsx
-│
-├── styles/
-└── utils/api.ts
-```
-
----
-
-## 📱 Core Screens
-
----
-
-## 1. Dashboard (Main Screen)
-
-### Purpose:
-
-Quick overview of user finances
-
-### Displays:
-
-* recent transactions
-* predicted upcoming spend
-* goal progress
-
----
-
-### Example Layout
-
-```text
---------------------------------
-🐷 PiggyBank
-
-Next likely spend:
-☕ Coffee in ~30 min (74%)
-
-You’re $42 away from your bike 🚲
-
-Recent:
-- Coffee $6.50
-- Uber $14.20
---------------------------------
-```
-
----
-
-## 2. Prediction Card
-
-### Purpose:
-
-Highlight upcoming behavior
-
-### Displays:
-
-* category
-* time window
-* probability
-
----
-
-### Example
-
-```text
-☕ Coffee
-Likely at 7:30–8:30 AM
-Probability: 74%
-```
-
----
-
-## 3. Goal Tracker
-
-### Purpose:
-
-Make spending meaningful
-
----
-
-### Displays:
-
-* goal (e.g. bike)
-* progress bar
-* remaining amount
-
----
-
-### Example
-
-```text
-🚲 Bike Goal: $250
-
-██████████░░░░░░ 40%
-
-$150 remaining
-```
-
----
-
-## 4. Chat View (Optional)
-
-### Purpose:
-
-Mirror SMS interaction in browser
-
----
-
-### Features:
-
-* message bubbles
-* system replies
-* user input
-
----
-
-### Example
-
-```text
-Piggy: You’re likely to grab coffee soon 👀
-User: yeah probably
-Piggy: Skip today → closer to your goal
-```
-
----
-
-## 🔌 API Integration
-
-Frontend communicates with backend via REST endpoints.
-
----
-
-### Example Calls
-
-```javascript
-// fetch transactions
-GET /transactions
-
-// fetch predictions
-GET /predict
-
-// fetch goals
-GET /goals
-```
-
----
-
-## 📱 Mobile Optimization
-
-### Techniques:
-
-* responsive layouts
-* flex/grid
-* viewport scaling
-
----
-
-### Tailwind Example
-
-```html
-<div class="max-w-md mx-auto p-4">
-```
-
-👉 Keeps UI narrow like a phone screen
-
----
-
-## ⚡ Performance Considerations
-
-* minimal state
-* lightweight components
-* lazy loading if needed
-
----
-
-## 🧠 UX Principles
-
-### 1. Clarity over complexity
-
-Avoid overwhelming users with data
-
----
-
-### 2. Actionable insights
-
-Every screen should answer:
-
-> “What should I do?”
-
----
-
-### 3. Emotional connection
-
-Tie spending to goals
-
----
-
-### 4. Consistency with SMS
-
-Frontend messaging should match Piggy’s tone
-
----
-
-## 🚀 Future Improvements
-
-* PWA support (add to home screen)
-* push notifications
-* richer analytics
-* animations / micro-interactions
-
----
-
-## 🏆 Summary
-
-The frontend is:
-
-> **a simple, mobile-first interface that reinforces PiggyBank’s SMS-driven experience**
-
-It provides visibility, but the real magic happens in the conversation.
-
----
+- Backend API integration for transactions and goals
+- Real authentication or phone-number-based demo identity
+- PWA install flow
+- Accessibility pass for chart keyboard interaction
