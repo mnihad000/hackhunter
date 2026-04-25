@@ -14,7 +14,7 @@ function LandingPage({ onGetStarted }: LandingPageProps) {
         </p>
         <div className="landing-status" aria-label="Spendly status">
           <span>Predictive spending companion</span>
-          <strong>74% signal confidence</strong>
+          <strong>96% signal confidence</strong>
         </div>
         <div className="landing-actions">
           <button className="primary-action" type="button" onClick={onGetStarted}>
