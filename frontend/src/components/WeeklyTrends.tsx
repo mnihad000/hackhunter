@@ -1,49 +1,59 @@
-import { getCategoryTotals, type Prediction, type Transaction } from "../demoLogic";
+import { formatCurrency, getCategoryTotals, type Prediction, type Transaction } from "../demoLogic";
 
 type WeeklyTrendsProps = {
   transactions: Transaction[];
-  prediction: Prediction;
+  prediction: Prediction | null;
 };
 
 const defaultTrends = [
   {
-    label: "Food",
-    value: "+18%",
-    copy: "Up this week, mostly from delivery and coffee.",
+    label: "Transactions",
+    value: "0",
+    copy: "Log purchases by SMS to populate the dashboard.",
   },
   {
-    label: "Transportation",
-    value: "Flat",
-    copy: "Rides stayed steady compared with last week.",
+    label: "Prediction",
+    value: "Pending",
+    copy: "The engine needs a few repeated purchases before it predicts the next habit.",
   },
   {
-    label: "Coffee",
-    value: "74%",
-    copy: "Most predictable habit by time of day.",
+    label: "Goal impact",
+    value: "$0",
+    copy: "Once a forecast appears, this card will estimate the weekly savings upside.",
   },
 ];
 
 function WeeklyTrends({ transactions, prediction }: WeeklyTrendsProps) {
   const topCategory = getCategoryTotals(transactions)[0];
-  const trends = topCategory
-    ? [
-        {
-          label: topCategory.category,
-          value: `${topCategory.percent}%`,
-          copy: "Largest current share of recent spending.",
-        },
-        {
-          label: prediction.category,
-          value: `${prediction.probability}%`,
-          copy: "Most predictable habit by time of day.",
-        },
-        {
-          label: "Goal impact",
-          value: `$${Math.round(prediction.amount * 5)}`,
-          copy: "Potential weekly savings from skipping this habit.",
-        },
-      ]
-    : defaultTrends;
+  const totalSpend = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+  const trends =
+    transactions.length === 0
+      ? defaultTrends
+      : [
+          {
+            label: topCategory ? topCategory.category : "Transactions",
+            value: topCategory ? `${topCategory.percent}%` : `${transactions.length}`,
+            copy: topCategory
+              ? "Largest current share of recent spending."
+              : "Recent purchases are starting to populate the dashboard.",
+          },
+          prediction
+            ? {
+                label: prediction.category,
+                value: `${prediction.probability}%`,
+                copy: "Most predictable habit by time of day.",
+              }
+            : {
+                label: "Prediction",
+                value: "Learning",
+                copy: "A few more repeated transactions will unlock the first forecast.",
+              },
+          {
+            label: "Recent spend",
+            value: formatCurrency(totalSpend),
+            copy: "Current total across the loaded transaction history.",
+          },
+        ];
 
   return (
     <section className="panel trend-card" aria-labelledby="trends-title">

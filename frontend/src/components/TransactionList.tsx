@@ -11,6 +11,10 @@ function TransactionList({
   selectedCategory,
   onClearCategory,
 }: TransactionListProps) {
+  const emptyCopy = selectedCategory
+    ? "No transactions in this category yet."
+    : "No transactions yet. Send an SMS like coffee 6.50 to populate the dashboard.";
+
   return (
     <section className="panel transaction-card" aria-labelledby="transactions-title">
       <div className="card-title-row">
@@ -39,7 +43,7 @@ function TransactionList({
           </li>
         ))}
       </ul>
-      {transactions.length === 0 && <p className="empty-copy">No transactions in this category yet.</p>}
+      {transactions.length === 0 && <p className="empty-copy">{emptyCopy}</p>}
     </section>
   );
 }
