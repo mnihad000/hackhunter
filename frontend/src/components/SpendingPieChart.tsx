@@ -7,6 +7,7 @@ type SpendingPieChartProps = {
 };
 
 const categoryColors: Record<string, string> = {
+  Coffee: "#9b6bff",
   Food: "#36b37e",
   Transportation: "#4f8cff",
   Entertainment: "#9b6bff",
@@ -15,6 +16,7 @@ const categoryColors: Record<string, string> = {
 };
 
 const categoryInsights: Record<string, string> = {
+  Coffee: "Coffee is a strong habit signal because it tends to repeat at the same time each day.",
   Food: "Most food spending happens after 7 PM, when delivery temptation is highest.",
   Transportation: "Transportation is steady this week, with rides clustered around evening plans.",
   Entertainment: "Entertainment is small but easy to trim when a goal needs a final push.",

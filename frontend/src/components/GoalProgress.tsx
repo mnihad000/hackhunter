@@ -1,39 +1,38 @@
-import { useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import {
   formatCurrency,
   getGoalProgress,
-  getRemainingGoalAmount,
   getGoalStatus,
+  getRemainingGoalAmount,
   type Goal,
 } from "../demoLogic";
 
 type GoalProgressProps = {
-  goal: Goal;
-  onGoalChange: (goal: Goal) => void;
+  goal: Goal | null;
+  isSaving: boolean;
+  saveError: string | null;
+  onGoalSave: (goal: Goal) => void | Promise<void>;
 };
 
-function GoalProgress({ goal, onGoalChange }: GoalProgressProps) {
-  const [savedDraft, setSavedDraft] = useState(String(goal.saved));
-  const [targetDraft, setTargetDraft] = useState(String(goal.target));
-  const progress = getGoalProgress(goal);
-  const remaining = getRemainingGoalAmount(goal);
-  const goalStatus = getGoalStatus(goal);
-  const goalMessage =
-    goalStatus === "overfunded"
-      ? "Congrats, you've got more than enough money."
-      : goalStatus === "met"
-        ? "You are there."
-        : `You are ${formatCurrency(remaining)} away.`;
+const fallbackGoal: Goal = {
+  name: "Bike fund",
+  target: 250,
+  saved: 0,
+};
+
+function GoalProgress({ goal, isSaving, saveError, onGoalSave }: GoalProgressProps) {
+  const baseGoal = goal ?? fallbackGoal;
+  const [nameDraft, setNameDraft] = useState(baseGoal.name);
+  const [savedDraft, setSavedDraft] = useState(String(baseGoal.saved));
+  const [targetDraft, setTargetDraft] = useState(String(baseGoal.target));
 
   useEffect(() => {
-    setSavedDraft(String(goal.saved));
-  }, [goal.saved]);
+    setNameDraft(baseGoal.name);
+    setSavedDraft(String(baseGoal.saved));
+    setTargetDraft(String(baseGoal.target));
+  }, [baseGoal.name, baseGoal.saved, baseGoal.target]);
 
-  useEffect(() => {
-    setTargetDraft(String(goal.target));
-  }, [goal.target]);
-
-  const parseMoneyInput = (value: string, minimum: number) => {
+  function parseMoneyInput(value: string, minimum: number) {
     const parsed = Number(value);
 
     if (!Number.isFinite(parsed)) {
@@ -41,14 +40,41 @@ function GoalProgress({ goal, onGoalChange }: GoalProgressProps) {
     }
 
     return Math.max(minimum, parsed);
+  }
+
+  const parsedSaved = parseMoneyInput(savedDraft, 0);
+  const parsedTarget = parseMoneyInput(targetDraft, 1);
+  const previewGoal: Goal = {
+    name: nameDraft.trim() || fallbackGoal.name,
+    saved: parsedSaved ?? baseGoal.saved,
+    target: parsedTarget ?? baseGoal.target,
   };
+  const progress = getGoalProgress(previewGoal);
+  const remaining = getRemainingGoalAmount(previewGoal);
+  const goalStatus = getGoalStatus(previewGoal);
+  const canSave = nameDraft.trim().length > 0 && parsedSaved !== null && parsedTarget !== null;
+  const goalMessage =
+    goalStatus === "overfunded"
+      ? "Congrats, you've got more than enough money."
+      : goalStatus === "met"
+        ? "You are there."
+        : `You are ${formatCurrency(remaining)} away.`;
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!canSave) {
+      return;
+    }
+
+    void onGoalSave(previewGoal);
+  }
 
   return (
     <section className="panel goal-card" aria-labelledby="goal-title">
       <div className="goal-heading">
         <div>
           <p className="section-label">goal progress</p>
-          <h2 id="goal-title">{goal.name}</h2>
+          <h2 id="goal-title">{goal ? previewGoal.name : "Set your first goal"}</h2>
         </div>
         <strong>{formatCurrency(remaining)}</strong>
       </div>
@@ -56,15 +82,16 @@ function GoalProgress({ goal, onGoalChange }: GoalProgressProps) {
         <span style={{ width: `${progress}%` }} />
       </div>
       <p className="goal-copy">
-        {formatCurrency(goal.saved)} saved of {formatCurrency(goal.target)}. {goalMessage}
+        {formatCurrency(previewGoal.saved)} saved of {formatCurrency(previewGoal.target)}.{" "}
+        {goal ? goalMessage : "Create a goal to turn nudges into something concrete."}
       </p>
-      <div className="goal-editor" aria-label="Edit savings goal">
+      <form className="goal-editor" aria-label="Edit savings goal" onSubmit={handleSubmit}>
         <label>
           Goal
           <input
             type="text"
-            value={goal.name}
-            onChange={(event) => onGoalChange({ ...goal, name: event.target.value })}
+            value={nameDraft}
+            onChange={(event) => setNameDraft(event.target.value)}
           />
         </label>
         <label>
@@ -73,17 +100,7 @@ function GoalProgress({ goal, onGoalChange }: GoalProgressProps) {
             inputMode="decimal"
             type="text"
             value={savedDraft}
-            onBlur={() => setSavedDraft(String(goal.saved))}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              const parsed = parseMoneyInput(nextValue, 0);
-
-              setSavedDraft(nextValue);
-
-              if (parsed !== null) {
-                onGoalChange({ ...goal, saved: parsed });
-              }
-            }}
+            onChange={(event) => setSavedDraft(event.target.value)}
           />
         </label>
         <label>
@@ -92,20 +109,14 @@ function GoalProgress({ goal, onGoalChange }: GoalProgressProps) {
             inputMode="decimal"
             type="text"
             value={targetDraft}
-            onBlur={() => setTargetDraft(String(goal.target))}
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              const parsed = parseMoneyInput(nextValue, 1);
-
-              setTargetDraft(nextValue);
-
-              if (parsed !== null) {
-                onGoalChange({ ...goal, target: parsed });
-              }
-            }}
+            onChange={(event) => setTargetDraft(event.target.value)}
           />
         </label>
-      </div>
+        <button className="primary-action compact-action goal-save-action" type="submit" disabled={!canSave || isSaving}>
+          {isSaving ? "Saving..." : goal ? "Save goal" : "Create goal"}
+        </button>
+      </form>
+      {saveError && <p className="status-banner error">{saveError}</p>}
     </section>
   );
 }
