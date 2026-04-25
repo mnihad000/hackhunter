@@ -38,11 +38,20 @@ const transactions = [
   { id: 5, category: "Shopping", merchant: "Phone case", amount: 11.75, time: "Saturday, 2:24 PM" },
 ];
 
+function formatCurrentDate() {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
+}
+
 function Dashboard({ onBack }: DashboardProps) {
   const [goal, setGoal] = useState<Goal>(initialGoal);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [nudgeTone, setNudgeTone] = useState<NudgeTone>("Gentle");
   const [nudgeFrequency, setNudgeFrequency] = useState<NudgeFrequency>("Normal");
+  const currentDate = formatCurrentDate();
 
   const filteredTransactions = useMemo(
     () =>
@@ -57,8 +66,8 @@ function Dashboard({ onBack }: DashboardProps) {
       <section className="dashboard-shell">
         <header className="dashboard-header">
           <div>
-            <p className="dashboard-kicker">PiggyBank</p>
-            <h1 id="dashboard-title">Today</h1>
+            <p className="dashboard-kicker">Spendly</p>
+            <h1 id="dashboard-title">{currentDate}</h1>
           </div>
           <button className="secondary-action" type="button" onClick={onBack}>
             Landing
