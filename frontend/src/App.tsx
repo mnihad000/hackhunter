@@ -6,11 +6,15 @@ import Galaxy from "./components/Galaxy";
 import GalaxyScene from "./components/GalaxyScene";
 import Vignette from "./components/Vignette";
 import { Bloom, EffectComposer, Select, Selection } from "@react-three/postprocessing";
+import Dashboard from "./components/Dashboard";
+import LandingPage from "./components/LandingPage";
 
 const galaxyFocal: [number, number] = [0.5, 0.25];
 const galaxyRotation: [number, number] = [1.0, 0.0];
+type AppScreen = "landing" | "dashboard";
 
 function App() {
+  const [activeScreen, setActiveScreen] = useState<AppScreen>("landing");
   const [mousePosition, setMousePosition] = useState({ x: 0.5, y: 0.5 });
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -50,6 +54,10 @@ function App() {
     [],
   );
 
+  if (activeScreen === "dashboard") {
+    return <Dashboard onBack={() => setActiveScreen("landing")} />;
+  }
+
   return (
     <div className="app-container" onMouseMove={handleMouseMove}>
       <div className="galaxy-background">
@@ -72,7 +80,9 @@ function App() {
 
       {galaxySceneCanvas}
       <Vignette />
-      <div className="content-container" />
+      <div className="content-container">
+        <LandingPage onGetStarted={() => setActiveScreen("dashboard")} />
+      </div>
     </div>
   );
 }
