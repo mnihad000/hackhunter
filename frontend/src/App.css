@@ -210,6 +210,13 @@
   margin-bottom: 18px;
 }
 
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .dashboard-kicker,
 .section-label {
   color: var(--sage-dark);
@@ -250,6 +257,10 @@
 .panel,
 .sms-preview {
   margin-top: 12px;
+}
+
+.dashboard-alert {
+  margin: 0 0 12px;
 }
 
 .panel {
@@ -395,6 +406,21 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+
+.plaid-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.plaid-copy {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .goal-heading strong {
@@ -876,6 +902,10 @@
 
   .secondary-action {
     width: fit-content;
+  }
+
+  .header-actions {
+    justify-content: flex-start;
   }
 
   .segmented-control {

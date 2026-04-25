@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   DEFAULT_PHONE_NUMBER,
   fetchGoal,
@@ -9,6 +9,7 @@ import {
 import type { Goal, Prediction, Transaction } from "../demoLogic";
 import GoalProgress from "./GoalProgress";
 import NudgeSettings, { type NudgeFrequency, type NudgeTone } from "./NudgeSettings";
+import PlaidConnect from "./PlaidConnect";
 import PredictionCard from "./PredictionCard";
 import SmsPreview from "./SmsPreview";
 import SpendingPieChart from "./SpendingPieChart";
@@ -34,10 +35,8 @@ function Dashboard({ onBack }: DashboardProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [nudgeTone, setNudgeTone] = useState<NudgeTone>("Gentle");
   const [nudgeFrequency, setNudgeFrequency] = useState<NudgeFrequency>("Normal");
-  const [phoneNumberDraft, setPhoneNumberDraft] = useState(DEFAULT_PHONE_NUMBER);
-  const [activePhoneNumber, setActivePhoneNumber] = useState(DEFAULT_PHONE_NUMBER);
+  const activePhoneNumber = DEFAULT_PHONE_NUMBER;
   const [refreshKey, setRefreshKey] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSavingGoal, setIsSavingGoal] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [goalError, setGoalError] = useState<string | null>(null);
@@ -47,7 +46,6 @@ function Dashboard({ onBack }: DashboardProps) {
     const abortController = new AbortController();
 
     async function loadDashboardData() {
-      setIsLoading(true);
       setLoadError(null);
       setGoalError(null);
 
@@ -78,10 +76,6 @@ function Dashboard({ onBack }: DashboardProps) {
         setTransactions([]);
         setGoal(null);
         setPrediction(null);
-      } finally {
-        if (!abortController.signal.aborted) {
-          setIsLoading(false);
-        }
       }
     }
 
@@ -123,24 +117,9 @@ function Dashboard({ onBack }: DashboardProps) {
     }
   }
 
-  function handlePhoneSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const normalizedPhoneNumber = phoneNumberDraft.trim() || DEFAULT_PHONE_NUMBER;
-    setPhoneNumberDraft(normalizedPhoneNumber);
-    setActivePhoneNumber(normalizedPhoneNumber);
-    setRefreshKey((currentKey) => currentKey + 1);
-  }
-
   function handleRefreshClick() {
     setRefreshKey((currentKey) => currentKey + 1);
   }
-
-  const dashboardStatus = loadError
-    ? loadError
-    : isLoading
-      ? `Loading live data for ${activePhoneNumber}...`
-      : `Live data loaded for ${activePhoneNumber}`;
 
   return (
     <main className="dashboard-page" aria-labelledby="dashboard-title">
@@ -150,44 +129,16 @@ function Dashboard({ onBack }: DashboardProps) {
             <p className="dashboard-kicker">Spendly</p>
             <h1 id="dashboard-title">{currentDate}</h1>
           </div>
-          <button className="secondary-action" type="button" onClick={onBack}>
-            Back
-          </button>
-        </header>
-
-        <section className="panel control-card" aria-label="Dashboard connection controls">
-          <div className="card-title-row">
-            <div>
-              <p className="section-label">live backend</p>
-              <h2>Dashboard source</h2>
-            </div>
-            <button
-              className="secondary-action compact-action"
-              type="button"
-              onClick={handleRefreshClick}
-              disabled={isLoading}
-            >
-              Refresh
+          <div className="header-actions">
+            <button className="secondary-action" type="button" onClick={onBack}>
+              Back
             </button>
           </div>
-          <form className="phone-form" onSubmit={handlePhoneSubmit}>
-            <label>
-              Demo phone number
-              <input
-                inputMode="tel"
-                type="text"
-                value={phoneNumberDraft}
-                onChange={(event) => setPhoneNumberDraft(event.target.value)}
-                placeholder={DEFAULT_PHONE_NUMBER}
-              />
-            </label>
-            <button className="primary-action compact-action" type="submit" disabled={isLoading}>
-              Load dashboard
-            </button>
-          </form>
-          <p className={loadError ? "status-banner error" : "status-banner"}>{dashboardStatus}</p>
-        </section>
+        </header>
 
+        {loadError && <p className="status-banner error dashboard-alert">{loadError}</p>}
+
+        <PlaidConnect phoneNumber={activePhoneNumber} onSynced={handleRefreshClick} />
         <PredictionCard prediction={prediction} goal={goal} />
         <GoalProgress
           goal={goal}

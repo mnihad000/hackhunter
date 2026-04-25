@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from backend.core.config import Environment, collect_config_errors, get_settings
 from backend.core.exceptions import ConfigValidationError
 from backend.routes.dashboard import router as dashboard_router
+from backend.routes.plaid import router as plaid_router
 from backend.routes.predict import router as predict_router
 from backend.routes.sms import router as sms_router
 from backend.routes.system import router as system_router
@@ -29,6 +30,7 @@ def create_app() -> FastAPI:
     app.include_router(sms_router)
     app.include_router(predict_router)
     app.include_router(dashboard_router)
+    app.include_router(plaid_router)
 
     @app.exception_handler(ConfigValidationError)
     async def config_error_handler(_, exc: ConfigValidationError) -> JSONResponse:

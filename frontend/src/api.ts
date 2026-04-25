@@ -52,6 +52,30 @@ type ApiErrorResponse = {
   errors?: string[];
 };
 
+type PlaidLinkTokenResponse = {
+  link_token: string;
+};
+
+type PlaidExchangeResponse = {
+  user_id: number;
+  plaid_item_id: string;
+  institution_name: string | null;
+  sync: {
+    added: number;
+    modified: number;
+    removed: number;
+  };
+};
+
+type PlaidSyncResponse = {
+  user_id: number;
+  sync: {
+    added: number;
+    modified: number;
+    removed: number;
+  };
+};
+
 function normalizePhoneNumber(phoneNumber: string) {
   return phoneNumber.trim();
 }
@@ -250,4 +274,49 @@ export async function fetchPrediction(
     probability: Math.round(topPrediction.probability * 100),
     amount: getTypicalSpend(topPrediction.category, transactions),
   } satisfies Prediction;
+}
+
+export async function createPlaidLinkToken(phoneNumber: string) {
+  const payload = await request<PlaidLinkTokenResponse>("/plaid/link-token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      phone_number: normalizePhoneNumber(phoneNumber),
+    }),
+  });
+
+  return payload.link_token;
+}
+
+export async function exchangePlaidPublicToken(
+  phoneNumber: string,
+  publicToken: string,
+  institution?: { institution_id?: string | null; name?: string | null },
+) {
+  return request<PlaidExchangeResponse>("/plaid/exchange-public-token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      phone_number: normalizePhoneNumber(phoneNumber),
+      public_token: publicToken,
+      institution_id: institution?.institution_id ?? null,
+      institution_name: institution?.name ?? null,
+    }),
+  });
+}
+
+export async function syncPlaidTransactions(phoneNumber: string) {
+  return request<PlaidSyncResponse>("/plaid/sync", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      phone_number: normalizePhoneNumber(phoneNumber),
+    }),
+  });
 }

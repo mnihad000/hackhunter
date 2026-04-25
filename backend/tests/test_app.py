@@ -12,3 +12,6 @@ def test_create_app_registers_expected_routes():
     assert "/predict" in paths
     assert "/transactions" in paths
     assert "/goals" in paths
+    assert "/plaid/link-token" in paths
+    assert "/plaid/exchange-public-token" in paths
+    assert "/plaid/webhook" in paths

@@ -27,7 +27,7 @@ def test_required_tables_exist_after_create_all(monkeypatch, sqlite_db_url: str)
     Base.metadata.create_all(bind=engine)
 
     ok, missing = check_required_tables(
-        {"users", "transactions", "goals", "feedback", "nudge_events"},
+        {"users", "transactions", "goals", "feedback", "nudge_events", "plaid_items"},
         sqlite_db_url,
     )
     assert ok is True

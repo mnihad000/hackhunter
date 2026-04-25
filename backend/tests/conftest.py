@@ -7,9 +7,9 @@ from pathlib import Path
 from backend.core.config import clear_settings_cache
 from backend.db.base import Base
 from backend.db.session import clear_db_cache
-from backend.models import Feedback, Goal, NudgeEvent, Transaction, User
+from backend.models import Feedback, Goal, NudgeEvent, PlaidItem, Transaction, User
 
-_ = (User, Transaction, Goal, Feedback, NudgeEvent)
+_ = (User, Transaction, Goal, Feedback, NudgeEvent, PlaidItem)
 
 
 @pytest.fixture(autouse=True)

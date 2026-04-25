@@ -7,7 +7,7 @@ from backend.core.config import Environment, collect_config_errors, get_settings
 from backend.db.session import check_required_tables, ping_database
 
 router = APIRouter(tags=["system"])
-REQUIRED_TABLES = {"users", "transactions", "goals", "feedback", "nudge_events"}
+REQUIRED_TABLES = {"users", "transactions", "goals", "feedback", "nudge_events", "plaid_items"}
 
 
 @router.get("/healthz")

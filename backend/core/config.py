@@ -42,6 +42,14 @@ class GeminiConfig(BaseModel):
     timeout_seconds: int = 10
 
 
+class PlaidConfig(BaseModel):
+    client_id: str | None = None
+    secret: str | None = None
+    env: str = "sandbox"
+    webhook_url: str | None = None
+    transactions_days_requested: int = 180
+
+
 class SchedulerConfig(BaseModel):
     enabled: bool = True
     interval_seconds: int = 60
@@ -70,6 +78,7 @@ class Settings(BaseSettings):
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     twilio: TwilioConfig = Field(default_factory=TwilioConfig)
     gemini: GeminiConfig = Field(default_factory=GeminiConfig)
+    plaid: PlaidConfig = Field(default_factory=PlaidConfig)
     scheduler: SchedulerConfig = Field(default_factory=SchedulerConfig)
     prediction: PredictionConfig = Field(default_factory=PredictionConfig)
 
@@ -95,6 +104,17 @@ def collect_config_errors(settings: Settings, *, strict: bool = False) -> list[s
 
     if settings.gemini.timeout_seconds <= 0:
         errors.append("GEMINI__TIMEOUT_SECONDS must be greater than 0.")
+
+    if settings.plaid.env not in {"sandbox", "development", "production"}:
+        errors.append("PLAID__ENV must be sandbox, development, or production.")
+
+    if (settings.plaid.client_id and not settings.plaid.secret) or (
+        settings.plaid.secret and not settings.plaid.client_id
+    ):
+        errors.append("PLAID__CLIENT_ID and PLAID__SECRET must be configured together.")
+
+    if not 1 <= settings.plaid.transactions_days_requested <= 730:
+        errors.append("PLAID__TRANSACTIONS_DAYS_REQUESTED must be between 1 and 730.")
 
     if not 0 <= settings.prediction.nudge_probability_threshold <= 1:
         errors.append("PREDICTION__NUDGE_PROBABILITY_THRESHOLD must be between 0 and 1.")

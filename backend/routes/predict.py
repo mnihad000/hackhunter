@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from backend.db.session import get_db
 from backend.services.prediction import predict_for_user
-from backend.services.user_service import get_user_by_id, get_user_by_phone
+from backend.services.user_service import get_or_create_user_by_phone, get_user_by_id
 
 router = APIRouter(tags=["predict"])
 
@@ -23,7 +23,7 @@ def get_predictions(
     if user_id is not None:
         user = get_user_by_id(db, user_id)
     elif phone_number is not None:
-        user = get_user_by_phone(db, phone_number)
+        user = get_or_create_user_by_phone(db, phone_number)
 
     if user is None:
         raise HTTPException(status_code=404, detail="User not found.")
