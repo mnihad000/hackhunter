@@ -4,9 +4,11 @@ This is the backend execution checklist from start to finish.
 Use this order unless a dependency says otherwise.
 
 ## Current Progress
-- Completed: `A1` through `A6`, `B1` through `B7`, and `C5`.
+- Completed: `A1` through `A6`, `B1` through `B14`, `C1`, `C2`, and `C5`.
 - In place locally: `.env` created and `.gitignore` updated to exclude secrets.
-- Verification blocker: local Python runtime still missing usable `pip/pytest`, so full automated test run is pending environment fix.
+- Environment update: `pip` bootstrapped, backend requirements installed, and backend test suite now passes locally.
+- Verification status: `python -m pytest -q backend/tests -p no:cacheprovider --basetemp=C:\Users\nihad\AppData\Local\Temp\piggybank-pytest` → `44 passed`.
+- Remaining warning-only cleanup: FastAPI `on_event` deprecation warnings and a few `datetime.utcnow()` deprecation warnings.
 
 ## Priority Guide
 - `P0`: Must ship for hackathon MVP.
@@ -87,31 +89,31 @@ Use this order unless a dependency says otherwise.
   - Deliverables: response templates for transaction saved, invalid format, feedback, unknown.
   - Acceptance: webhook consistently returns quickly and does not block on heavy work.
 
-- [ ] `B8 (P0)` Implement prediction engine v1 (rule-based, recency-weighted intervals).
+- [x] `B8 (P0)` Implement prediction engine v1 (rule-based, recency-weighted intervals).
   - Deliverables: `predict_for_user(user_id) -> Prediction[]`.
   - Acceptance: produces category, probability, time window, confidence for users with enough history.
 
-- [ ] `B9 (P0)` Implement nudge eligibility policy.
+- [x] `B9 (P0)` Implement nudge eligibility policy.
   - Deliverables: threshold + in-window + no-recent-duplicate gating.
   - Acceptance: policy blocks duplicate/fatiguing nudges in configured cooldown.
 
-- [ ] `B10 (P0)` Implement Gemini agent decision/message adapter.
+- [x] `B10 (P0)` Implement Gemini agent decision/message adapter.
   - Deliverables: `decide_and_generate_nudge(prediction, user_context) -> NudgeDecision`.
   - Acceptance: Gemini only decides action/tone, never overwrites numeric prediction fields.
 
-- [ ] `B11 (P0)` Implement outbound Twilio sender adapter.
+- [x] `B11 (P0)` Implement outbound Twilio sender adapter.
   - Deliverables: `send_sms(to, body) -> ProviderResult`.
   - Acceptance: send success/failure is logged and persisted to `nudge_events`.
 
-- [ ] `B12 (P0)` Implement background scheduler for periodic prediction checks.
+- [x] `B12 (P0)` Implement background scheduler for periodic prediction checks.
   - Deliverables: async loop or scheduler job runner.
   - Acceptance: scheduler scans users, evaluates nudges, and dispatches eligible messages.
 
-- [ ] `B13 (P1)` Implement feedback ingestion and lightweight behavior updates.
+- [x] `B13 (P1)` Implement feedback ingestion and lightweight behavior updates.
   - Deliverables: feedback parser + persistence + simple adaptation signals.
   - Acceptance: feedback rows are stored and can influence nudge cooldown/tone selection.
 
-- [ ] `B14 (P0)` Add dashboard-support endpoints.
+- [x] `B14 (P0)` Add dashboard-support endpoints.
   - Deliverables:
     - `GET /transactions`
     - `GET /predict`
@@ -123,10 +125,10 @@ Use this order unless a dependency says otherwise.
 
 ## Section C - Quality and Shipping
 
-- [ ] `C1 (P0)` Unit tests for parser, classifier, prediction engine, and nudge policy.
+- [x] `C1 (P0)` Unit tests for parser, classifier, prediction engine, and nudge policy.
   - Acceptance: key decision logic has deterministic tests and edge-case coverage.
 
-- [ ] `C2 (P0)` Integration tests for `/sms` flow and DB persistence.
+- [x] `C2 (P0)` Integration tests for `/sms` flow and DB persistence.
   - Acceptance: test covers valid transaction, invalid format, feedback, unknown input.
 
 - [ ] `C3 (P1)` Mock-based tests for Gemini and Twilio adapters.
@@ -157,8 +159,8 @@ Use this order unless a dependency says otherwise.
 ## Public APIs and Interfaces to Lock
 
 - [ ] `I1 (P0)` Lock webhook contract for `POST /sms` (Twilio form payload + response format).
-- [ ] `I2 (P0)` Lock dashboard API response shapes for `GET /transactions`, `GET /predict`, `GET /goals`, `PATCH /goals`.
-- [ ] `I3 (P0)` Lock service interfaces:
+- [x] `I2 (P0)` Lock dashboard API response shapes for `GET /transactions`, `GET /predict`, `GET /goals`, `PATCH /goals`.
+- [x] `I3 (P0)` Lock service interfaces:
   - `parse_message(text) -> ParsedMessage`
   - `predict_for_user(user_id) -> Prediction[]`
   - `decide_and_generate_nudge(prediction, user_context) -> NudgeDecision`
@@ -168,14 +170,14 @@ Use this order unless a dependency says otherwise.
 
 ## Test Scenarios Checklist
 
-- [ ] Valid transaction SMS is parsed and stored.
-- [ ] Invalid transaction format returns guidance message.
+- [x] Valid transaction SMS is parsed and stored.
+- [x] Invalid transaction format returns guidance message.
 - [ ] Feedback reply is stored and affects adaptation signal.
-- [ ] Unknown command returns safe help response.
+- [x] Unknown command returns safe help response.
 - [ ] Duplicate/replayed webhook behavior is safe.
-- [ ] Prediction behavior with sparse, regular, and irregular histories.
-- [ ] Nudge gating inside vs outside predicted window.
-- [ ] Gemini unavailable fallback behavior.
+- [x] Prediction behavior with sparse, regular, and irregular histories.
+- [x] Nudge gating inside vs outside predicted window.
+- [x] Gemini unavailable fallback behavior.
 - [ ] Twilio send failure retry/error behavior.
 - [ ] End-to-end path from inbound SMS to logged nudge event.
 
@@ -202,3 +204,10 @@ Use this order unless a dependency says otherwise.
 5. `C1 -> C3` (minimum reliability)
 6. `C5 -> C9` (ship readiness)
 7. `D*` only if MVP is stable
+
+## Recommended Next Steps
+
+1. Finish `C3` and `C4` by adding explicit Twilio failure-path tests and replay/idempotency coverage for repeated webhook deliveries.
+2. Finish `C8` and `C9` by writing the deploy checklist and running a real manual smoke test with Twilio + Gemini configured.
+3. Configure the public `POST /sms` Twilio webhook and verify a real inbound message hits the backend.
+4. Optional cleanup after MVP is stable: replace deprecated FastAPI startup/shutdown hooks with lifespan handlers and switch internal UTC calls to timezone-aware `datetime.now(dt.UTC)`.

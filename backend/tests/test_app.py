@@ -10,3 +10,5 @@ def test_create_app_registers_expected_routes():
     assert "/readyz" in paths
     assert "/sms" in paths
     assert "/predict" in paths
+    assert "/transactions" in paths
+    assert "/goals" in paths
