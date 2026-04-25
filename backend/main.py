@@ -8,6 +8,9 @@ from fastapi.responses import JSONResponse
 
 from backend.core.config import Environment, collect_config_errors, get_settings
 from backend.core.exceptions import ConfigValidationError
+from backend.db.base import Base
+from backend.db.session import get_engine
+from backend.models import Feedback, Goal, NudgeEvent, PlaidItem, Transaction, User
 from backend.routes.dashboard import router as dashboard_router
 from backend.routes.plaid import router as plaid_router
 from backend.routes.predict import router as predict_router
@@ -16,6 +19,7 @@ from backend.routes.system import router as system_router
 from backend.services.scheduler import run_scheduler_forever, should_start_scheduler
 
 logger = logging.getLogger(__name__)
+_ = (User, Transaction, Goal, Feedback, NudgeEvent, PlaidItem)
 
 
 def create_app() -> FastAPI:
@@ -43,6 +47,12 @@ def create_app() -> FastAPI:
             raise ConfigValidationError(config_errors)
         if config_errors:
             logger.warning("App started in test mode with config issues: %s", config_errors)
+
+        # Hackathon/test mode guardrail: if the configured database exists but is empty,
+        # bootstrap the current schema so the dashboard doesn't crash on first refresh.
+        if settings.app.env == Environment.test and settings.database.url:
+            engine = get_engine(settings.database.url, settings.database.echo)
+            Base.metadata.create_all(bind=engine)
 
     @app.on_event("startup")
     async def start_scheduler_on_startup() -> None:
