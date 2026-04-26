@@ -74,6 +74,34 @@ def check_required_tables(
         return False, sorted(required_tables)
 
 
+def check_required_columns(
+    required_columns: dict[str, set[str]],
+    database_url: str | None = None,
+) -> tuple[bool, dict[str, list[str]]]:
+    settings = get_settings()
+    url = database_url or settings.database.url
+    if not url:
+        return False, {table_name: sorted(columns) for table_name, columns in required_columns.items()}
+
+    try:
+        engine = get_engine(url, settings.database.echo)
+        inspector = inspect(engine)
+        missing_by_table: dict[str, list[str]] = {}
+        for table_name, expected_columns in required_columns.items():
+            table_names = set(inspector.get_table_names())
+            if table_name not in table_names:
+                missing_by_table[table_name] = sorted(expected_columns)
+                continue
+
+            actual_columns = {column["name"] for column in inspector.get_columns(table_name)}
+            missing_columns = sorted(expected_columns.difference(actual_columns))
+            if missing_columns:
+                missing_by_table[table_name] = missing_columns
+        return len(missing_by_table) == 0, missing_by_table
+    except Exception:
+        return False, {table_name: sorted(columns) for table_name, columns in required_columns.items()}
+
+
 def clear_db_cache() -> None:
     _session_factory.cache_clear()
     get_engine.cache_clear()

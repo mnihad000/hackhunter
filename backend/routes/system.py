@@ -4,10 +4,14 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
 from backend.core.config import Environment, collect_config_errors, get_settings
-from backend.db.session import check_required_tables, ping_database
+from backend.db.session import check_required_columns, check_required_tables, ping_database
 
 router = APIRouter(tags=["system"])
-REQUIRED_TABLES = {"users", "transactions", "goals", "feedback", "nudge_events"}
+REQUIRED_TABLES = {"users", "transactions", "goals", "feedback", "nudge_events", "plaid_items"}
+REQUIRED_COLUMNS = {
+    "transactions": {"source", "plaid_transaction_id", "merchant_name"},
+    "plaid_items": {"plaid_item_id", "access_token", "institution_name", "sync_cursor", "status", "last_synced_at"},
+}
 
 
 @router.get("/healthz")
@@ -28,7 +32,18 @@ def readyz() -> JSONResponse | dict[str, object]:
             db_status = "ok"
             schema_ok, missing_tables = check_required_tables(REQUIRED_TABLES, settings.database.url)
             if schema_ok:
-                schema_status = "ok"
+                columns_ok, missing_columns = check_required_columns(REQUIRED_COLUMNS, settings.database.url)
+                if columns_ok:
+                    schema_status = "ok"
+                else:
+                    schema_status = "error"
+                    errors.append(
+                        "database schema missing required columns: "
+                        + "; ".join(
+                            f"{table}({', '.join(columns)})"
+                            for table, columns in sorted(missing_columns.items())
+                        )
+                    )
             else:
                 schema_status = "error"
                 errors.append(

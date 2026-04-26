@@ -19,3 +19,4 @@ class User(TimestampMixin, Base):
     goals = relationship("Goal", back_populates="user", cascade="all, delete-orphan")
     feedback_entries = relationship("Feedback", back_populates="user", cascade="all, delete-orphan")
     nudge_events = relationship("NudgeEvent", back_populates="user", cascade="all, delete-orphan")
+    plaid_items = relationship("PlaidItem", back_populates="user", cascade="all, delete-orphan")

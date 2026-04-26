@@ -13,7 +13,7 @@ function TransactionList({
 }: TransactionListProps) {
   const emptyCopy = selectedCategory
     ? "No transactions in this category yet."
-    : "No transactions yet. Send an SMS like coffee 6.50 to populate the dashboard.";
+    : "No bank transactions yet. Connect a Plaid sandbox account to populate the workspace.";
 
   return (
     <section className="panel transaction-card" aria-labelledby="transactions-title">

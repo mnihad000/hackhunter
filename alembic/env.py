@@ -7,10 +7,10 @@ from sqlalchemy import engine_from_config, pool
 
 from backend.core.config import clear_settings_cache, get_settings
 from backend.db.base import Base
-from backend.models import Feedback, Goal, NudgeEvent, Transaction, User
+from backend.models import Feedback, Goal, NudgeEvent, PlaidItem, Transaction, User
 
 # Keep model imports explicit so metadata is fully populated for autogenerate.
-_ = (User, Transaction, Goal, Feedback, NudgeEvent)
+_ = (User, Transaction, Goal, Feedback, NudgeEvent, PlaidItem)
 
 config = context.config
 
@@ -67,4 +67,3 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
-

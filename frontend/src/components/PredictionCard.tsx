@@ -14,8 +14,8 @@ function PredictionCard({ prediction, goal }: PredictionCardProps) {
           <h2 id="prediction-title">Not enough history yet</h2>
         </div>
         <p className="prediction-empty-copy">
-          Keep logging repeat purchases for the selected phone number and the forecast card will
-          fill in automatically.
+          Link a bank and let a few repeat transactions accumulate. The forecast card will start
+          filling in once the engine sees a reliable spending rhythm.
         </p>
         <div className="skip-impact">
           <p>What unlocks predictions?</p>
@@ -23,12 +23,12 @@ function PredictionCard({ prediction, goal }: PredictionCardProps) {
             <div>
               <span>Repeat category</span>
               <strong>3+ logs</strong>
-              <small>for the same habit</small>
+              <small>from the same spending habit</small>
             </div>
             <div>
               <span>Consistent timing</span>
               <strong>Daily rhythm</strong>
-              <small>helps the model find a window</small>
+              <small>helps the model forecast a window</small>
             </div>
             <div>
               <span>Goal context</span>

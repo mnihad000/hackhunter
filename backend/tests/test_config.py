@@ -18,6 +18,10 @@ def test_settings_load_from_env_and_cast_types_correctly(monkeypatch):
     monkeypatch.setenv("TWILIO__PHONE_NUMBER", "+15555550000")
     monkeypatch.setenv("GEMINI__API_KEY", "gem-key")
     monkeypatch.setenv("GEMINI__TIMEOUT_SECONDS", "12")
+    monkeypatch.setenv("PLAIDCLIENT_ID", "plaid-client")
+    monkeypatch.setenv("PLAIDSECRET", "plaid-secret")
+    monkeypatch.setenv("PLAIDENV", "sandbox")
+    monkeypatch.setenv("PLAIDTRANSACTIONS_DAYS_REQUESTED", "180")
     monkeypatch.setenv("SCHEDULER__INTERVAL_SECONDS", "45")
     monkeypatch.setenv("PREDICTION__NUDGE_PROBABILITY_THRESHOLD", "0.7")
     monkeypatch.setenv("PREDICTION__NUDGE_COOLDOWN_MINUTES", "30")
@@ -34,6 +38,10 @@ def test_settings_load_from_env_and_cast_types_correctly(monkeypatch):
     assert settings.app.debug is True
     assert settings.app.port == 9090
     assert settings.gemini.timeout_seconds == 12
+    assert settings.plaid.client_id == "plaid-client"
+    assert settings.plaid.secret == "plaid-secret"
+    assert settings.plaid.env == "sandbox"
+    assert settings.plaid.transactions_days_requested == 180
     assert settings.scheduler.interval_seconds == 45
     assert settings.prediction.nudge_probability_threshold == 0.7
     assert settings.prediction.nudge_cooldown_minutes == 30
@@ -53,6 +61,8 @@ def test_prod_mode_rejects_insecure_or_missing_required_config(monkeypatch):
     monkeypatch.delenv("TWILIO__AUTH_TOKEN", raising=False)
     monkeypatch.delenv("TWILIO__PHONE_NUMBER", raising=False)
     monkeypatch.delenv("GEMINI__API_KEY", raising=False)
+    monkeypatch.delenv("PLAIDCLIENT_ID", raising=False)
+    monkeypatch.delenv("PLAIDSECRET", raising=False)
     clear_settings_cache()
 
     app = create_app()

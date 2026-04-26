@@ -17,6 +17,7 @@ router = APIRouter(tags=["dashboard"])
 class TransactionResponse(BaseModel):
     id: int
     category: str
+    merchant_name: str | None = None
     amount: float
     occurred_at: str
 
@@ -96,6 +97,7 @@ def get_transactions(
             TransactionResponse(
                 id=transaction.id,
                 category=transaction.category,
+                merchant_name=transaction.merchant_name,
                 amount=round(float(transaction.amount), 2),
                 occurred_at=transaction.occurred_at.isoformat(),
             ).model_dump()

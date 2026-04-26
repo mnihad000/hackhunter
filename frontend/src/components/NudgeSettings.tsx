@@ -19,7 +19,7 @@ function NudgeSettings({
 }: NudgeSettingsProps) {
   return (
     <section className="panel nudge-card" aria-labelledby="nudge-title">
-      <p className="section-label">nudge settings</p>
+      <p className="section-label">alert settings</p>
       <h2 id="nudge-title">Preferences</h2>
 
       <div className="setting-group">

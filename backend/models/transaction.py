@@ -12,6 +12,7 @@ from backend.db.base import Base
 class Transaction(Base):
     __tablename__ = "transactions"
     __table_args__ = (
+        Index("ix_transactions_source", "source"),
         Index("ix_transactions_user_occurred_at", "user_id", "occurred_at"),
     )
 
@@ -23,6 +24,9 @@ class Transaction(Base):
         nullable=False,
     )
     category: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+    source: Mapped[str] = mapped_column(String(16), default="sms", nullable=False)
+    plaid_transaction_id: Mapped[str | None] = mapped_column(String(128), unique=True, nullable=True)
+    merchant_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
     amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     occurred_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True),

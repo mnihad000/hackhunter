@@ -10,7 +10,7 @@ type SmsPreviewProps = {
 
 function buildMessage(prediction: Prediction | null, goal: Goal | null, tone: NudgeTone) {
   if (prediction === null) {
-    return "Log a few more repeat purchases and the live SMS nudge preview will appear here.";
+    return "Connect a bank and let a few repeat purchases arrive. The live nudge preview will appear once the model sees a pattern.";
   }
 
   const amount = formatCurrency(prediction.amount);
@@ -31,7 +31,7 @@ function SmsPreview({ prediction, goal, tone, frequency }: SmsPreviewProps) {
   return (
     <section className="sms-preview" aria-labelledby="sms-title">
       <p className="section-label" id="sms-title">
-        sms nudge preview
+        plaid-powered nudge preview
       </p>
       <div className="sms-meta">
         <span>{tone} tone</span>

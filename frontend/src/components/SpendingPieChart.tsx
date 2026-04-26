@@ -90,7 +90,7 @@ function SpendingPieChart({
       </div>
 
       {segments.length === 0 ? (
-        <p className="empty-copy">Transactions will appear here once a purchase is logged.</p>
+        <p className="empty-copy">Transactions will appear here once a bank account is linked and synced.</p>
       ) : (
       <div className="spending-chart-layout">
         <div

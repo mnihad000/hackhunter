@@ -27,7 +27,7 @@ def test_required_tables_exist_after_create_all(monkeypatch, sqlite_db_url: str)
     Base.metadata.create_all(bind=engine)
 
     ok, missing = check_required_tables(
-        {"users", "transactions", "goals", "feedback", "nudge_events"},
+        {"users", "transactions", "goals", "feedback", "nudge_events", "plaid_items"},
         sqlite_db_url,
     )
     assert ok is True
@@ -56,4 +56,3 @@ def test_user_phone_number_is_unique(monkeypatch, sqlite_db_url: str):
 def test_transaction_declares_fk_to_users():
     fk_targets = {fk.target_fullname for fk in Transaction.__table__.foreign_keys}
     assert "users.id" in fk_targets
-

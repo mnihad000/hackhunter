@@ -8,6 +8,7 @@ export const DEFAULT_PHONE_NUMBER = "+15555550000";
 type ApiTransaction = {
   id: number;
   category: string;
+  merchant_name?: string | null;
   amount: number;
   occurred_at: string;
 };
@@ -45,6 +46,26 @@ type ApiPrediction = {
 type ApiPredictionResponse = {
   user_id: number;
   predictions: ApiPrediction[];
+};
+
+type PlaidLinkTokenResponse = {
+  user_id: number;
+  link_token: string;
+  expiration?: string | null;
+};
+
+type PlaidExchangeResponse = {
+  user_id: number;
+  plaid_item_id: string;
+  institution_name?: string | null;
+  imported_count: number;
+};
+
+type PlaidSyncResponse = {
+  user_id: number;
+  linked_items: number;
+  imported_count: number;
+  removed_count: number;
 };
 
 type ApiErrorResponse = {
@@ -193,7 +214,7 @@ export async function fetchTransactions(phoneNumber: string, signal?: AbortSigna
     return {
       id: transaction.id,
       category,
-      merchant: category,
+      merchant: transaction.merchant_name?.trim() || category,
       amount: transaction.amount,
       time: formatTransactionTime(transaction.occurred_at),
     } satisfies Transaction;
@@ -250,4 +271,33 @@ export async function fetchPrediction(
     probability: Math.round(topPrediction.probability * 100),
     amount: getTypicalSpend(topPrediction.category, transactions),
   } satisfies Prediction;
+}
+
+export async function createPlaidLinkToken(phoneNumber: string) {
+  return request<PlaidLinkTokenResponse>(`/plaid/link-token${buildQuery(phoneNumber)}`, {
+    method: "POST",
+  });
+}
+
+export async function exchangePlaidPublicToken(
+  phoneNumber: string,
+  publicToken: string,
+  institutionName?: string,
+) {
+  return request<PlaidExchangeResponse>(`/plaid/exchange-public-token${buildQuery(phoneNumber)}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      public_token: publicToken,
+      institution_name: institutionName?.trim() || undefined,
+    }),
+  });
+}
+
+export async function syncPlaidTransactions(phoneNumber: string) {
+  return request<PlaidSyncResponse>(`/plaid/sync${buildQuery(phoneNumber)}`, {
+    method: "POST",
+  });
 }

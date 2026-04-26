@@ -47,6 +47,14 @@ class SchedulerConfig(BaseModel):
     interval_seconds: int = 60
 
 
+class PlaidConfig(BaseModel):
+    client_id: str | None = None
+    secret: str | None = None
+    env: str = "sandbox"
+    transactions_days_requested: int = 180
+    timeout_seconds: int = 15
+
+
 class PredictionConfig(BaseModel):
     nudge_probability_threshold: float = 0.65
     nudge_cooldown_minutes: int = 120
@@ -71,7 +79,26 @@ class Settings(BaseSettings):
     twilio: TwilioConfig = Field(default_factory=TwilioConfig)
     gemini: GeminiConfig = Field(default_factory=GeminiConfig)
     scheduler: SchedulerConfig = Field(default_factory=SchedulerConfig)
+    plaid: PlaidConfig = Field(default_factory=PlaidConfig)
     prediction: PredictionConfig = Field(default_factory=PredictionConfig)
+    plaidclient_id: str | None = Field(default=None, validation_alias="PLAIDCLIENT_ID", exclude=True)
+    plaidsecret: str | None = Field(default=None, validation_alias="PLAIDSECRET", exclude=True)
+    plaidenv: str | None = Field(default=None, validation_alias="PLAIDENV", exclude=True)
+    plaidtransactions_days_requested: int | None = Field(
+        default=None,
+        validation_alias="PLAIDTRANSACTIONS_DAYS_REQUESTED",
+        exclude=True,
+    )
+
+    def model_post_init(self, __context: object) -> None:
+        if not self.plaid.client_id and self.plaidclient_id:
+            self.plaid.client_id = self.plaidclient_id
+        if not self.plaid.secret and self.plaidsecret:
+            self.plaid.secret = self.plaidsecret
+        if self.plaidenv:
+            self.plaid.env = self.plaidenv
+        if self.plaidtransactions_days_requested is not None:
+            self.plaid.transactions_days_requested = self.plaidtransactions_days_requested
 
 
 def collect_config_errors(settings: Settings, *, strict: bool = False) -> list[str]:
@@ -89,12 +116,25 @@ def collect_config_errors(settings: Settings, *, strict: bool = False) -> list[s
             errors.append("TWILIO__PHONE_NUMBER is required outside test mode.")
         if not settings.gemini.api_key:
             errors.append("GEMINI__API_KEY is required outside test mode.")
+        if not settings.plaid.client_id:
+            errors.append("PLAIDCLIENT_ID is required outside test mode.")
+        if not settings.plaid.secret:
+            errors.append("PLAIDSECRET is required outside test mode.")
 
     if settings.scheduler.interval_seconds <= 0:
         errors.append("SCHEDULER__INTERVAL_SECONDS must be greater than 0.")
 
     if settings.gemini.timeout_seconds <= 0:
         errors.append("GEMINI__TIMEOUT_SECONDS must be greater than 0.")
+
+    if settings.plaid.timeout_seconds <= 0:
+        errors.append("PLAID timeout_seconds must be greater than 0.")
+
+    if settings.plaid.env not in {"sandbox", "development", "production"}:
+        errors.append("PLAIDENV must be one of: sandbox, development, production.")
+
+    if settings.plaid.transactions_days_requested <= 0:
+        errors.append("PLAIDTRANSACTIONS_DAYS_REQUESTED must be greater than 0.")
 
     if not 0 <= settings.prediction.nudge_probability_threshold <= 1:
         errors.append("PREDICTION__NUDGE_PROBABILITY_THRESHOLD must be between 0 and 1.")

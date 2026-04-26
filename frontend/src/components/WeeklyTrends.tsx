@@ -9,17 +9,17 @@ const defaultTrends = [
   {
     label: "Transactions",
     value: "0",
-    copy: "Log purchases by SMS to populate the dashboard.",
+    copy: "Connect a Plaid sandbox bank to populate the workspace.",
   },
   {
     label: "Prediction",
     value: "Pending",
-    copy: "The engine needs a few repeated purchases before it predicts the next habit.",
+    copy: "The engine needs a few repeated bank transactions before it forecasts the next habit.",
   },
   {
     label: "Goal impact",
     value: "$0",
-    copy: "Once a forecast appears, this card will estimate the weekly savings upside.",
+    copy: "Once a forecast appears, this card will estimate the weekly savings upside from real bank activity.",
   },
 ];
 

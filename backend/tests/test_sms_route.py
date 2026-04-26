@@ -32,6 +32,7 @@ def test_sms_returns_twiml_200_for_valid_payload():
         assert len(transactions) == 1
         assert transactions[0].user_id == users[0].id
         assert transactions[0].amount == Decimal("6.50")
+        assert transactions[0].source == "sms"
 
 
 def test_sms_empty_body_classifies_unknown():
