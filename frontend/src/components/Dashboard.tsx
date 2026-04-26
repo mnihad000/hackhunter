@@ -419,6 +419,11 @@ function Dashboard({ onBack }: DashboardProps) {
       : transactionCount > 0
         ? `${transactionCount} transactions loaded`
         : "No imports yet";
+  const summaryCopy = loadError
+    ? "The workspace is still available, but one or more dashboard requests need attention."
+    : hasImportedData
+      ? "Bank activity, goals, and nudge preferences are ready to review in one place."
+      : "Use one phone number per workspace, then connect a bank or log repeat purchases to unlock the forecast.";
   const dashboardStatus = loadError
     ? loadError
     : isLoading
@@ -440,40 +445,44 @@ function Dashboard({ onBack }: DashboardProps) {
           </button>
         </header>
 
-        <section className="panel control-card plaid-hero-card" aria-label="Bank workspace controls">
-          <div className="plaid-hero-grid">
-            <div>
-              <p className="section-label">connected finance view</p>
-              <h2>Bank connection cockpit</h2>
-              <p className="plaid-hero-copy">
-                Connect a Plaid sandbox account, sync fresh bank activity, and feed the prediction
-                engine with real transaction history instead of demo data.
-              </p>
-              <div className="status-chip-row" aria-label="Plaid workspace status">
-                <span className={`status-chip ${plaidWorkspace.isLinked ? "linked" : "pending"}`}>
-                  {connectionLabel}
-                </span>
-                <span className="status-chip neutral">{institutionLabel}</span>
-                <span className="status-chip neutral">{importedLabel}</span>
+        <div className="dashboard-top-grid">
+          <section className="panel summary-card" aria-label="Workspace summary">
+            <div className="summary-card-head">
+              <div>
+                <p className="section-label">overview</p>
+                <h2>Daily signal board</h2>
               </div>
-            </div>
-            <div className="plaid-action-stack">
               <button
                 className="secondary-action compact-action"
                 type="button"
                 onClick={handleRefreshClick}
                 disabled={isLoading || isPlaidBusy}
               >
-                Refresh insights
+                Refresh
               </button>
-              <p className="plaid-action-note">Last sync {syncLabel}</p>
             </div>
-          </div>
-
-          <div className="plaid-control-grid">
-            <form className="phone-form plaid-account-form" onSubmit={handlePhoneSubmit}>
+            <p className="summary-copy">{summaryCopy}</p>
+            <div className="summary-metric-grid">
+              <article>
+                <span>Status</span>
+                <strong>{connectionLabel}</strong>
+              </article>
+              <article>
+                <span>Phone</span>
+                <strong>{activePhoneNumber}</strong>
+              </article>
+              <article>
+                <span>Institution</span>
+                <strong>{institutionLabel}</strong>
+              </article>
+              <article>
+                <span>Imported</span>
+                <strong>{importedLabel}</strong>
+              </article>
+            </div>
+            <form className="phone-form summary-form" onSubmit={handlePhoneSubmit}>
               <label>
-                Account phone
+                Workspace phone
                 <input
                   inputMode="tel"
                   type="text"
@@ -486,49 +495,49 @@ function Dashboard({ onBack }: DashboardProps) {
                 Open workspace
               </button>
             </form>
+            <p className="summary-caption">Last sync {syncLabel}</p>
+            <p className={loadError ? "status-banner error" : "status-banner"}>{dashboardStatus}</p>
+          </section>
 
-            <div className="plaid-action-row">
-            <button
-              className="secondary-action compact-action"
-              type="button"
-              onClick={handleConnectBankClick}
-              disabled={isLoading || isPlaidBusy}
-            >
-              {isPlaidBusy ? "Working..." : plaidWorkspace.isLinked ? "Reconnect bank" : "Connect bank"}
-            </button>
-            <button
-              className="primary-action compact-action"
-              type="button"
-              onClick={handlePlaidSyncClick}
-              disabled={isLoading || isPlaidBusy}
-            >
-              Sync bank data
-            </button>
-          </div>
-          </div>
-
-          <div className="plaid-summary-grid">
-            <article>
-              <span>Workspace key</span>
-              <strong>{activePhoneNumber}</strong>
-            </article>
-            <article>
-              <span>Last sync</span>
-              <strong>{syncLabel}</strong>
-            </article>
-            <article>
-              <span>Imported bank data</span>
+          <section className="panel plaid-import-card" aria-label="Plaid import controls">
+            <div className="plaid-import-head">
+              <div>
+                <p className="section-label">bank connection</p>
+                <h2>Plaid import</h2>
+                <p className="plaid-import-copy">
+                  Use Plaid Link to choose a bank and enter Sandbox credentials.
+                </p>
+              </div>
+              <button
+                className="secondary-action compact-action"
+                type="button"
+                onClick={handlePlaidSyncClick}
+                disabled={isLoading || isPlaidBusy}
+              >
+                {isPlaidBusy ? "Working..." : "Sync"}
+              </button>
+            </div>
+            <div className="plaid-import-actions">
+              <button
+                className="primary-action compact-action"
+                type="button"
+                onClick={handleConnectBankClick}
+                disabled={isLoading || isPlaidBusy}
+              >
+                {plaidWorkspace.isLinked ? "Reconnect bank" : "Connect bank"}
+              </button>
+            </div>
+            <div className="plaid-import-meta">
+              <span>{institutionLabel}</span>
               <strong>{importedLabel}</strong>
-            </article>
-          </div>
-
-          <p className={loadError ? "status-banner error" : "status-banner"}>{dashboardStatus}</p>
-          {(plaidError || plaidStatus) && (
-            <p className={plaidError ? "status-banner error" : "status-banner"}>
-              {plaidError ?? plaidStatus}
-            </p>
-          )}
-        </section>
+            </div>
+            {(plaidError || plaidStatus) && (
+              <p className={plaidError ? "status-banner error" : "status-banner"}>
+                {plaidError ?? plaidStatus}
+              </p>
+            )}
+          </section>
+        </div>
 
         <PredictionCard prediction={prediction} goal={goal} />
         <GoalProgress

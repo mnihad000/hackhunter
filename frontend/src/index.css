@@ -1,8 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap");
+
 :root {
-  font-family: Bahnschrift, "Segoe UI Variable", "Segoe UI", Verdana, sans-serif;
+  font-family: "IBM Plex Sans Condensed", "Aptos Narrow", "Trebuchet MS", sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light dark;
+  color-scheme: light;
   color: rgba(255, 255, 255, 0.87);
   background-color: #000;
   font-synthesis: none;

@@ -19,8 +19,11 @@ function NudgeSettings({
 }: NudgeSettingsProps) {
   return (
     <section className="panel nudge-card" aria-labelledby="nudge-title">
-      <p className="section-label">alert settings</p>
+      <p className="section-label">nudge settings</p>
       <h2 id="nudge-title">Preferences</h2>
+      <p className="nudge-copy">
+        Tell us how you want Spendly to talk to you when it sends a nudge.
+      </p>
 
       <div className="setting-group">
         <span>Tone</span>
