@@ -1,7 +1,26 @@
 import type { Goal, Prediction, Transaction } from "./demoLogic";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? "/api" : "http://127.0.0.1:8000");
+type ApiEnv = {
+  DEV?: boolean;
+  VITE_API_BASE_URL?: string;
+};
+
+export function resolveApiBaseUrl(
+  env: ApiEnv = (import.meta as ImportMeta & { env?: ApiEnv }).env ?? { DEV: true },
+) {
+  const configuredBaseUrl = env.VITE_API_BASE_URL?.trim();
+  if (configuredBaseUrl) {
+    return configuredBaseUrl;
+  }
+
+  if (env.DEV) {
+    return "/api";
+  }
+
+  throw new Error("VITE_API_BASE_URL is required for production builds.");
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 export const DEFAULT_PHONE_NUMBER = "+15555550000";
 

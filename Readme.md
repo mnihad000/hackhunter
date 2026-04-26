@@ -11,6 +11,24 @@ Instead of tracking what you already spent, PiggyBank predicts what you’re abo
 
 ---
 
+## Deployment
+
+Backend deployment target: Railway
+Frontend deployment target: Vercel
+
+Railway backend:
+
+* Start command: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+* Health check path: `/healthz`
+* Readiness check path: `/readyz`
+* Required env vars: `DATABASE__URL`, `TWILIO__ACCOUNT_SID`, `TWILIO__AUTH_TOKEN`, `TWILIO__PHONE_NUMBER`, `GEMINI__API_KEY`, `PLAIDCLIENT_ID`, `PLAIDSECRET`
+* Browser allowlist env var: `APP__CORS_ORIGINS=https://your-frontend.vercel.app`
+
+Vercel frontend:
+
+* Required env var: `VITE_API_BASE_URL=https://your-backend.up.railway.app`
+* Production must point at the Railway backend URL; the frontend no longer falls back to localhost.
+
 ## 💡 The Problem
 
 Most financial stress doesn’t come from big purchases.

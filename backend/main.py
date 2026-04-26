@@ -4,6 +4,7 @@ import asyncio
 import logging
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.core.config import Environment, collect_config_errors, get_settings
@@ -26,6 +27,14 @@ def create_app() -> FastAPI:
         version=settings.app.version,
         debug=settings.app.debug,
     )
+    if settings.app.cors_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.app.cors_origins,
+            allow_credentials=False,
+            allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
+            allow_headers=["Accept", "Content-Type"],
+        )
     app.include_router(system_router)
     app.include_router(sms_router)
     app.include_router(plaid_router)
@@ -38,6 +47,13 @@ def create_app() -> FastAPI:
 
     @app.on_event("startup")
     def validate_config_on_startup() -> None:
+        logger.info(
+            "Starting app env=%s host=%s port=%s cors_origins=%s",
+            settings.app.env.value,
+            settings.app.host,
+            settings.app.port,
+            len(settings.app.cors_origins),
+        )
         config_errors = collect_config_errors(settings, strict=settings.app.env == Environment.prod)
         if config_errors and settings.app.env != Environment.test:
             raise ConfigValidationError(config_errors)

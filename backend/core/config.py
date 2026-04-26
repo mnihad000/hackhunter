@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from functools import lru_cache
+import json
 
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -22,6 +23,19 @@ class AppConfig(BaseModel):
     debug: bool = False
     host: str = "0.0.0.0"
     port: int = 8000
+    cors_origins_raw: str = Field(default="", validation_alias="CORS_ORIGINS", repr=False)
+
+    @property
+    def cors_origins(self) -> list[str]:
+        raw_value = self.cors_origins_raw.strip()
+        if not raw_value:
+            return []
+        if raw_value.startswith("["):
+            parsed_value = json.loads(raw_value)
+            if not isinstance(parsed_value, list):
+                raise ValueError("APP__CORS_ORIGINS JSON value must be an array of origin strings.")
+            return [item.strip() for item in parsed_value if isinstance(item, str) and item.strip()]
+        return [item.strip() for item in raw_value.split(",") if item.strip()]
 
 
 class DatabaseConfig(BaseModel):
@@ -168,6 +182,8 @@ def collect_config_errors(settings: Settings, *, strict: bool = False) -> list[s
             errors.append("APP__DEBUG must be false when APP__ENV=prod.")
         if settings.app.env == Environment.prod and not settings.twilio.validate_signature:
             errors.append("TWILIO__VALIDATE_SIGNATURE must be true when APP__ENV=prod.")
+        if "*" in settings.app.cors_origins:
+            errors.append("APP__CORS_ORIGINS cannot contain '*' when APP__ENV=prod.")
 
     return errors
 

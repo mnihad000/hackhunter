@@ -12,6 +12,7 @@ def test_settings_load_from_env_and_cast_types_correctly(monkeypatch):
     monkeypatch.setenv("APP__ENV", "local")
     monkeypatch.setenv("APP__DEBUG", "true")
     monkeypatch.setenv("APP__PORT", "9090")
+    monkeypatch.setenv("APP__CORS_ORIGINS", "https://piggybank.vercel.app, https://staging-piggybank.vercel.app")
     monkeypatch.setenv("DATABASE__URL", "sqlite+pysqlite:///:memory:")
     monkeypatch.setenv("TWILIO__ACCOUNT_SID", "AC123")
     monkeypatch.setenv("TWILIO__AUTH_TOKEN", "token")
@@ -37,6 +38,10 @@ def test_settings_load_from_env_and_cast_types_correctly(monkeypatch):
 
     assert settings.app.debug is True
     assert settings.app.port == 9090
+    assert settings.app.cors_origins == [
+        "https://piggybank.vercel.app",
+        "https://staging-piggybank.vercel.app",
+    ]
     assert settings.gemini.timeout_seconds == 12
     assert settings.plaid.client_id == "plaid-client"
     assert settings.plaid.secret == "plaid-secret"
@@ -63,6 +68,37 @@ def test_prod_mode_rejects_insecure_or_missing_required_config(monkeypatch):
     monkeypatch.delenv("GEMINI__API_KEY", raising=False)
     monkeypatch.delenv("PLAIDCLIENT_ID", raising=False)
     monkeypatch.delenv("PLAIDSECRET", raising=False)
+    clear_settings_cache()
+
+    app = create_app()
+    with pytest.raises(ConfigValidationError):
+        with TestClient(app):
+            pass
+
+
+def test_settings_accept_cors_origins_json_array(monkeypatch):
+    monkeypatch.setenv("APP__CORS_ORIGINS", '["https://piggybank.vercel.app", "https://preview-piggybank.vercel.app"]')
+    clear_settings_cache()
+
+    settings = get_settings()
+
+    assert settings.app.cors_origins == [
+        "https://piggybank.vercel.app",
+        "https://preview-piggybank.vercel.app",
+    ]
+
+
+def test_prod_mode_rejects_wildcard_cors_origin(monkeypatch):
+    monkeypatch.setenv("APP__ENV", "prod")
+    monkeypatch.setenv("APP__DEBUG", "false")
+    monkeypatch.setenv("APP__CORS_ORIGINS", "*")
+    monkeypatch.setenv("DATABASE__URL", "sqlite+pysqlite:///:memory:")
+    monkeypatch.setenv("TWILIO__ACCOUNT_SID", "AC123")
+    monkeypatch.setenv("TWILIO__AUTH_TOKEN", "token")
+    monkeypatch.setenv("TWILIO__PHONE_NUMBER", "+15555550000")
+    monkeypatch.setenv("GEMINI__API_KEY", "gem-key")
+    monkeypatch.setenv("PLAIDCLIENT_ID", "plaid-client")
+    monkeypatch.setenv("PLAIDSECRET", "plaid-secret")
     clear_settings_cache()
 
     app = create_app()
