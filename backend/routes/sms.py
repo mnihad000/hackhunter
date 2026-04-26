@@ -7,6 +7,7 @@ from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from backend.db.session import get_db
+from backend.services.demo_nudge import maybe_send_rapid_repeat_demo_nudge
 from backend.services.feedback_service import save_feedback
 from backend.services.message_classifier import classify_message
 from backend.services.sms_replies import build_sms_reply
@@ -47,11 +48,17 @@ async def receive_sms(request: Request, db: Session = Depends(get_db)) -> Respon
             return Response(content=_twiml_message(reply), status_code=400, media_type="application/xml")
 
         user = get_or_create_user_by_phone(db, sender)
-        save_transaction(
+        transaction = save_transaction(
             db=db,
             user_id=user.id,
             category=parsed.category,
             amount=parsed.amount,
+        )
+        maybe_send_rapid_repeat_demo_nudge(
+            db=db,
+            user=user,
+            category=parsed.category,
+            latest_occurred_at=transaction.occurred_at,
         )
         reply = build_sms_reply(
             "transaction",
